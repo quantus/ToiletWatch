@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>toilet_red.png</file>
+        <file>toilet_transparent.png</file>
+        <file>toilet.png</file>
+    </qresource>
+</RCC>

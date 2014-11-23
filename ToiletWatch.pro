@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets
 
 TARGET = ToiletWatch
 TEMPLATE = app
@@ -17,4 +15,10 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h
 
-FORMS    += mainwindow.ui
+FORMS    +=
+
+RESOURCES += \
+    ToiletWatch.qrc
+
+OTHER_FILES += \
+    LICENSE.txt

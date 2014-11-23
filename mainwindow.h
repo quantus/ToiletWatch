@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 namespace Ui {
 class MainWindow;
@@ -16,7 +17,11 @@ public:
     ~MainWindow();
 
 private:
-    Ui::MainWindow *ui;
+    enum states {FREE, OCCUPIED, WAITING, OFFLINE};
+    states state;
+    void setState(states s);
+
+    QSystemTrayIcon *trayIcon;
 };
 
 #endif // MAINWINDOW_H
