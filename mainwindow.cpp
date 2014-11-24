@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&netManager, SIGNAL(finished(QNetworkReply*)),
              this, SLOT(httpFinished(QNetworkReply*)));
 
+    connect(&pingTimer, SIGNAL(timeout()), this, SLOT(sendPing()));
+
     this->openConnection();
 }
 
@@ -66,11 +68,13 @@ void MainWindow::onConnected()
     qDebug() << "WebSocket connected";
     connect(&webSocket, &QWebSocket::textMessageReceived,
             this, &MainWindow::onTextMessageReceived);
+    pingTimer.start(20000);
 }
 void MainWindow::onDisconnect()
 {
     qDebug() << "WebSocket disconnected";
     this->setState(OFFLINE);
+    pingTimer.stop();
 }
 void MainWindow::onError(QAbstractSocket::SocketError socketError)
 {
@@ -90,6 +94,12 @@ void MainWindow::onTextMessageReceived(QString message)
         this->setState(FREE);
     else
         this->setState(OCCUPIED);
+}
+void MainWindow::sendPing()
+{
+    qDebug() << "Sending ping";
+    //Avoid Heroku conection timeouts
+    webSocket.sendTextMessage("Ping");
 }
 
 void MainWindow::setState(states s){

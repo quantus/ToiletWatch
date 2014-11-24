@@ -5,6 +5,7 @@
 #include <QSystemTrayIcon>
 #include <QtWebSockets/QWebSocket>
 #include <QNetworkAccessManager>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +25,7 @@ private slots:
     void onError(QAbstractSocket::SocketError socketError);
     void onTextMessageReceived(QString message);
     void httpFinished(QNetworkReply*);
+    void sendPing();
 
 private:
     enum states {FREE, OCCUPIED, WAITING, OFFLINE};
@@ -34,7 +36,7 @@ private:
     QSystemTrayIcon *trayIcon;
     QWebSocket webSocket;
     QNetworkAccessManager netManager;
-
+    QTimer pingTimer;
 };
 
 #endif // MAINWINDOW_H
