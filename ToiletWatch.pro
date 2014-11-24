@@ -24,3 +24,5 @@ OTHER_FILES += \
     LICENSE.txt
 
 ICON = toilet.icns
+
+QMAKE_INFO_PLIST = Info.plist
