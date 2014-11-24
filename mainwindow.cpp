@@ -33,6 +33,7 @@ MainWindow::~MainWindow()
 
 }
 void MainWindow::openConnection(){
+    qDebug() << "Open connection";
     webSocket.open(QUrl(QStringLiteral("ws://isthetoiletfree.fastmonkeys.com/hasfreesocket")));
     QNetworkRequest request;
     request.setUrl(QUrl("http://isthetoiletfree.fastmonkeys.com"));
@@ -42,6 +43,7 @@ void MainWindow::openConnection(){
 }
 void MainWindow::httpFinished(QNetworkReply*r){
     if(r->error() == 0){
+        qDebug() << "Http request ok";
         QByteArray data=r->readAll();
         QString str(data);
         if(str.contains(">no<"))
@@ -54,7 +56,7 @@ void MainWindow::httpFinished(QNetworkReply*r){
         }
     }
     else {
-        qDebug() << r->error();
+        qDebug() << "Http request failed " << r->error();
         this->setState(OFFLINE);
     }
     r->deleteLater();
@@ -67,21 +69,23 @@ void MainWindow::onConnected()
 }
 void MainWindow::onDisconnect()
 {
-    qDebug() << "Failed";
+    qDebug() << "WebSocket disconnected";
     this->setState(OFFLINE);
 }
 void MainWindow::onError(QAbstractSocket::SocketError socketError)
 {
     if(socketError == QAbstractSocket::RemoteHostClosedError){
+        qDebug() << "WebSocket connection reset";
+        webSocket.abort();
         this->openConnection();
         return;
     }
-    qDebug() << "Err " << socketError;
+    qDebug() << "WebSocket error " << socketError;
     this->setState(OFFLINE);
 }
 void MainWindow::onTextMessageReceived(QString message)
 {
-    qDebug() << "Message received:" << message;
+    qDebug() << "WebSocket received:" << message;
     if(message == "{'hasFree': 'yes'}")
         this->setState(FREE);
     else
