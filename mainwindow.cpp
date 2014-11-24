@@ -90,10 +90,14 @@ void MainWindow::onError(QAbstractSocket::SocketError socketError)
 void MainWindow::onTextMessageReceived(QString message)
 {
     qDebug() << "WebSocket received:" << message;
-    if(message == "{'hasFree': 'yes'}")
+    if(message.contains("yes"))
         this->setState(FREE);
-    else
+    else if(message.contains("no"))
         this->setState(OCCUPIED);
+    else{
+        qDebug() << message;
+        this->setState(OFFLINE);
+    }
 }
 void MainWindow::sendPing()
 {
