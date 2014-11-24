@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
              this, SLOT(httpFinished(QNetworkReply*)));
 
     connect(&pingTimer, SIGNAL(timeout()), this, SLOT(sendPing()));
+    connect(&reconnectTimer, SIGNAL(timeout()), this, SLOT(openConnection()));
+    reconnectTimer.setSingleShot(true);
 
     this->openConnection();
 }
@@ -35,15 +37,14 @@ MainWindow::~MainWindow()
 
 }
 void MainWindow::openConnection(){
-    qDebug() << "Open connection";
-    webSocket.open(QUrl(QStringLiteral("ws://isthetoiletfree.fastmonkeys.com/hasfreesocket")));
+    qDebug() << "Http request";
     QNetworkRequest request;
     request.setUrl(QUrl("http://isthetoiletfree.fastmonkeys.com"));
     request.setRawHeader("User-Agent", "ToiletWatch 1.0");
-
     netManager.get(request);
 }
 void MainWindow::httpFinished(QNetworkReply*r){
+    r->deleteLater();
     if(r->error() == 0){
         qDebug() << "Http request ok";
         QByteArray data=r->readAll();
@@ -53,15 +54,19 @@ void MainWindow::httpFinished(QNetworkReply*r){
         else if(str.contains(">yes<"))
             this->setState(FREE);
         else {
-            qDebug() << str;
-            this->setState(OFFLINE);
+            qDebug() << "Http content parse error " << str;
+            goto error;
         }
+        qDebug() << "WebSocket connection";
+        webSocket.open(QUrl(QStringLiteral("ws://isthetoiletfree.fastmonkeys.com/hasfreesocket")));
+        return;
     }
     else {
         qDebug() << "Http request failed " << r->error();
-        this->setState(OFFLINE);
     }
-    r->deleteLater();
+error:
+    this->setState(OFFLINE);
+    reconnectTimer.start(10000);
 }
 void MainWindow::onConnected()
 {
@@ -78,14 +83,10 @@ void MainWindow::onDisconnect()
 }
 void MainWindow::onError(QAbstractSocket::SocketError socketError)
 {
-    if(socketError == QAbstractSocket::RemoteHostClosedError){
-        qDebug() << "WebSocket connection reset";
-        webSocket.abort();
-        this->openConnection();
-        return;
-    }
     qDebug() << "WebSocket error " << socketError;
     this->setState(OFFLINE);
+    webSocket.abort();
+    reconnectTimer.start(10000);
 }
 void MainWindow::onTextMessageReceived(QString message)
 {

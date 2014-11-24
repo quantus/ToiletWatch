@@ -26,17 +26,17 @@ private slots:
     void onTextMessageReceived(QString message);
     void httpFinished(QNetworkReply*);
     void sendPing();
+    void openConnection();
 
 private:
     enum states {FREE, OCCUPIED, WAITING, OFFLINE};
     states state;
     void setState(states s);
-    void openConnection();
 
     QSystemTrayIcon *trayIcon;
     QWebSocket webSocket;
     QNetworkAccessManager netManager;
-    QTimer pingTimer;
+    QTimer pingTimer, reconnectTimer;
 };
 
 #endif // MAINWINDOW_H
