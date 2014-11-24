@@ -22,3 +22,5 @@ RESOURCES += \
 
 OTHER_FILES += \
     LICENSE.txt
+
+ICON = toilet.icns

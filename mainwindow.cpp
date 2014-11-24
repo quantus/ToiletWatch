@@ -1,5 +1,7 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QApplication>
 #include <QNetworkReply>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -8,7 +10,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction *quitAction = new QAction(tr("&Quit"), this);
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+    notifyAction = new QAction("", this);
+    connect(notifyAction, SIGNAL(triggered()), this, SLOT(onNotifyClick()));
     QMenu *trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(notifyAction);
+    trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
 
     trayIcon = new QSystemTrayIcon(this);
@@ -106,19 +112,34 @@ void MainWindow::sendPing()
     //Avoid Heroku conection timeouts
     webSocket.sendTextMessage("Ping");
 }
+void MainWindow::onNotifyClick(){
+    setState(this->state == WAITING?OCCUPIED:WAITING);
+}
 
 void MainWindow::setState(states s){
-    this->state = s;
-    switch (this->state) {
+    switch (s) {
     case FREE:
+        if(this->state == WAITING)
+            trayIcon->showMessage("The toilet is now free", "", QSystemTrayIcon::Information);
+        notifyAction->setEnabled(false);
+        notifyAction->setText(tr("&Notify when free"));
         trayIcon->setIcon(QIcon(":/toilet.png"));
         break;
     case OCCUPIED:
+        notifyAction->setEnabled(true);
+        notifyAction->setText(tr("&Notify when free"));
+        trayIcon->setIcon(QIcon(":/toilet_red.png"));
+        break;
     case WAITING:
+        notifyAction->setEnabled(true);
+        notifyAction->setText(tr("&Remove notification"));
         trayIcon->setIcon(QIcon(":/toilet_red.png"));
         break;
     case OFFLINE:
+        notifyAction->setEnabled(false);
+        notifyAction->setText(tr("&Notify when free"));
         trayIcon->setIcon(QIcon(":/toilet_transparent.png"));
         break;
     }
+    this->state = s;
 }

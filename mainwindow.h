@@ -27,6 +27,7 @@ private slots:
     void httpFinished(QNetworkReply*);
     void sendPing();
     void openConnection();
+    void onNotifyClick();
 
 private:
     enum states {FREE, OCCUPIED, WAITING, OFFLINE};
@@ -34,6 +35,7 @@ private:
     void setState(states s);
 
     QSystemTrayIcon *trayIcon;
+    QAction *notifyAction;
     QWebSocket webSocket;
     QNetworkAccessManager netManager;
     QTimer pingTimer, reconnectTimer;
